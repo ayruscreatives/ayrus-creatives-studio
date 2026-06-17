@@ -1,0 +1,14 @@
+﻿services:
+  - type: web
+    name: ayrus-creatives
+    env: node
+    buildCommand: npm install
+    startCommand: node app.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+    disk:
+      name: uploads
+      mountPath: /public/work
+      sizeGB: 1
+
