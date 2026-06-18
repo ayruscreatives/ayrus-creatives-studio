@@ -7,8 +7,15 @@
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PERSISTENT_DIR
+        value: /opt/render/data
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
     disk:
-      name: uploads
-      mountPath: /public/work
+      name: appdata
+      mountPath: /opt/render/data
       sizeGB: 1
-
