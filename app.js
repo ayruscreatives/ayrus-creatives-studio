@@ -9,7 +9,6 @@ const { Readable } = require('stream');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// On Render, PERSISTENT_DIR points to the mounted disk; locally use ./data
 const DATA_DIR = process.env.PERSISTENT_DIR || path.join(__dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'work.json');
 
@@ -24,7 +23,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 200 * 1024 * 1024 } });
 
 function readWork() {
   try { return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); }
@@ -57,7 +56,12 @@ app.get('/admin', (req, res) => {
   res.render('admin', { work, message: null });
 });
 
-app.post('/admin/upload', upload.single('asset'), async (req, res) => {
+app.post('/admin/upload', (req, res, next) => {
+  upload.single('asset')(req, res, (err) => {
+    if (err) return res.render('admin', { work: readWork(), message: 'Upload failed: ' + err.message });
+    next();
+  });
+}, async (req, res) => {
   const { brand, type, brief } = req.body;
   const work = readWork();
   let file = null;
@@ -83,9 +87,8 @@ app.post('/admin/delete/:id', async (req, res) => {
   let work = readWork();
   const item = work.find(w => w.id === req.params.id);
 
-  if (item && item.file) {
+  if (item && item.file && item.file.includes('cloudinary')) {
     try {
-      // Extract public_id from Cloudinary URL
       const match = item.file.match(/\/ayrus-creatives\/([^.]+)/);
       if (match) {
         const publicId = 'ayrus-creatives/' + match[1];
