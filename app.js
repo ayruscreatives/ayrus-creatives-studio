@@ -1,9 +1,7 @@
 ﻿require('dotenv').config();
 const express = require('express');
-const multer = require('multer');
 const path = require('path');
 const { v2: cloudinary } = require('cloudinary');
-const { Readable } = require('stream');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,8 +16,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
-
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 200 * 1024 * 1024 } });
+app.use(express.json());
 
 async function readWork() {
   try {
@@ -48,21 +45,6 @@ async function readWork() {
   }
 }
 
-function uploadToCloudinary(buffer, originalname, context) {
-  return new Promise((resolve, reject) => {
-    const isVideo = /\.(mp4|mov|webm)$/i.test(originalname);
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        resource_type: isVideo ? 'video' : 'image',
-        folder: 'ayrus-creatives',
-        context,
-      },
-      (error, result) => error ? reject(error) : resolve({ url: result.secure_url, isVideo, public_id: result.public_id })
-    );
-    Readable.from(buffer).pipe(stream);
-  });
-}
-
 app.get('/', async (req, res) => {
   const work = await readWork();
   res.render('index', { work });
@@ -73,29 +55,34 @@ app.get('/admin', async (req, res) => {
   res.render('admin', { work, message: null });
 });
 
-app.post('/admin/upload', (req, res, next) => {
-  upload.single('asset')(req, res, (err) => {
-    if (err) return res.render('admin', { work: [], message: 'Upload failed: ' + err.message });
-    next();
+// Generate signature for direct browser → Cloudinary upload
+app.get('/admin/sign-upload', (req, res) => {
+  const timestamp = Math.round(Date.now() / 1000);
+  const params = { folder: 'ayrus-creatives', timestamp };
+  const signature = cloudinary.utils.api_sign_request(params, process.env.CLOUDINARY_API_SECRET);
+  res.json({
+    timestamp,
+    signature,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   });
-}, async (req, res) => {
-  const { brand, type, brief } = req.body;
+});
+
+// Save metadata after browser uploads file directly to Cloudinary
+app.post('/admin/upload', async (req, res) => {
+  const { brand, type, brief, public_id, resource_type } = req.body;
   const work_id = Date.now().toString();
-
-  if (!req.file) {
-    const work = await readWork();
-    return res.render('admin', { work, message: 'No file selected.' });
-  }
-
   try {
-    const context = `work_id=${work_id}|brand=${brand}|type=${type}|brief=${brief}`;
-    await uploadToCloudinary(req.file.buffer, req.file.originalname, context);
-    const work = await readWork();
-    res.render('admin', { work, message: 'Work item added successfully.' });
+    const isVideo = resource_type === 'video';
+    await cloudinary.uploader.explicit(public_id, {
+      type: 'upload',
+      resource_type: isVideo ? 'video' : 'image',
+      context: `work_id=${work_id}|brand=${brand}|type=${type}|brief=${brief}`,
+    });
+    res.json({ ok: true });
   } catch (err) {
-    console.error('Cloudinary upload error:', err);
-    const work = await readWork();
-    res.render('admin', { work, message: 'Upload failed: ' + err.message });
+    console.error('Cloudinary save error:', err);
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -120,7 +107,6 @@ app.post('/admin/update', async (req, res) => {
 app.post('/admin/delete/:id', async (req, res) => {
   const work = await readWork();
   const item = work.find(w => w.id === req.params.id);
-
   if (item) {
     try {
       const publicId = item.file.match(/\/ayrus-creatives\/([^.]+)/)?.[1];
@@ -131,7 +117,6 @@ app.post('/admin/delete/:id', async (req, res) => {
       console.error('Cloudinary delete error:', err);
     }
   }
-
   res.redirect('/admin');
 });
 

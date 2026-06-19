@@ -35,15 +35,16 @@
     <!-- Upload Form -->
     <div class="bg-[#161616] rounded-sm p-7 mb-10">
       <h2 class="text-sm font-medium uppercase tracking-widest text-white/40 mb-6">Add New Work</h2>
-      <form action="/admin/upload" method="POST" enctype="multipart/form-data" class="space-y-5">
+      <div id="upload-message" class="hidden mb-4 px-4 py-3 rounded-sm text-sm"></div>
+      <div class="space-y-5">
         <div>
           <label class="block text-xs text-white/40 mb-1.5">Brand Name</label>
-          <input type="text" name="brand" required placeholder="e.g. Maaté Skincare"
+          <input type="text" id="brand" placeholder="e.g. Maaté Skincare"
             class="w-full bg-[#0F0F0F] border border-white/10 rounded-sm px-3 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/30" />
         </div>
         <div>
           <label class="block text-xs text-white/40 mb-1.5">Output Type</label>
-          <select name="type" required
+          <select id="type"
             class="w-full bg-[#0F0F0F] border border-white/10 rounded-sm px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/30">
             <option value="">Select type…</option>
             <option value="Stills">Stills</option>
@@ -54,19 +55,22 @@
         </div>
         <div>
           <label class="block text-xs text-white/40 mb-1.5">One-line Brief</label>
-          <input type="text" name="brief" required maxlength="140" placeholder="e.g. Hero product stills for Diwali launch campaign"
+          <input type="text" id="brief" maxlength="140" placeholder="e.g. Hero product stills for Diwali launch campaign"
             class="w-full bg-[#0F0F0F] border border-white/10 rounded-sm px-3 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/30" />
         </div>
         <div>
-          <label class="block text-xs text-white/40 mb-1.5">Asset (image or video, max 50 MB)</label>
-          <input type="file" name="asset" accept="image/*,video/*"
+          <label class="block text-xs text-white/40 mb-1.5">Asset (image or video)</label>
+          <input type="file" id="asset" accept="image/*,video/*"
             class="w-full bg-[#0F0F0F] border border-white/10 rounded-sm px-3 py-2.5 text-sm text-white/60 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:bg-white/10 file:text-white hover:file:bg-white/20 focus:outline-none" />
         </div>
-        <button type="submit"
-          class="bg-[#C8A97A] text-black px-6 py-2.5 rounded-sm text-sm font-medium hover:bg-[#b8956a] transition-colors">
-          Upload Work
-        </button>
-      </form>
+        <div>
+          <button onclick="handleUpload()"
+            class="bg-[#C8A97A] text-black px-6 py-2.5 rounded-sm text-sm font-medium hover:bg-[#b8956a] transition-colors">
+            Upload Work
+          </button>
+          <span id="upload-progress" class="ml-3 text-xs text-white/40 hidden">Uploading…</span>
+        </div>
+      </div>
     </div>
 
     <!-- Existing Work -->
@@ -142,6 +146,76 @@
     function toggleEdit(id) {
       var el = document.getElementById('edit-' + id);
       el.classList.toggle('hidden');
+    }
+
+    async function handleUpload() {
+      const brand = document.getElementById('brand').value.trim();
+      const type = document.getElementById('type').value;
+      const brief = document.getElementById('brief').value.trim();
+      const file = document.getElementById('asset').files[0];
+      const msgEl = document.getElementById('upload-message');
+      const progress = document.getElementById('upload-progress');
+
+      if (!brand || !type || !brief || !file) {
+        msgEl.className = 'mb-4 px-4 py-3 rounded-sm text-sm bg-red-900/30 border border-red-500/30 text-red-300';
+        msgEl.textContent = 'Please fill in all fields and select a file.';
+        return;
+      }
+
+      progress.classList.remove('hidden');
+      msgEl.className = 'hidden';
+
+      // Step 1: get signature from server
+      const sigRes = await fetch('/admin/sign-upload');
+      const { timestamp, signature, api_key, cloud_name } = await sigRes.json();
+
+      // Step 2: upload directly to Cloudinary
+      const isVideo = /\.(mp4|mov|webm)$/i.test(file.name);
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'ayrus-creatives');
+      formData.append('timestamp', timestamp);
+      formData.append('signature', signature);
+      formData.append('api_key', api_key);
+
+      const resourceType = isVideo ? 'video' : 'image';
+      const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/${resourceType}/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!uploadRes.ok) {
+        const err = await uploadRes.json();
+        progress.classList.add('hidden');
+        msgEl.className = 'mb-4 px-4 py-3 rounded-sm text-sm bg-red-900/30 border border-red-500/30 text-red-300';
+        msgEl.textContent = 'Upload failed: ' + (err.error?.message || 'Unknown error');
+        return;
+      }
+
+      const uploaded = await uploadRes.json();
+
+      // Step 3: save metadata on server
+      const saveRes = await fetch('/admin/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ brand, type, brief, public_id: uploaded.public_id, resource_type: resourceType }),
+      });
+
+      progress.classList.add('hidden');
+
+      if (saveRes.ok) {
+        msgEl.className = 'mb-4 px-4 py-3 rounded-sm text-sm bg-green-900/30 border border-green-500/30 text-green-300';
+        msgEl.textContent = 'Work item added successfully.';
+        document.getElementById('brand').value = '';
+        document.getElementById('type').value = '';
+        document.getElementById('brief').value = '';
+        document.getElementById('asset').value = '';
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        const err = await saveRes.json();
+        msgEl.className = 'mb-4 px-4 py-3 rounded-sm text-sm bg-red-900/30 border border-red-500/30 text-red-300';
+        msgEl.textContent = 'Metadata save failed: ' + err.error;
+      }
     }
   </script>
 </body>
