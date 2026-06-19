@@ -104,15 +104,13 @@ app.post('/admin/update', async (req, res) => {
   }
 });
 
-app.post('/admin/delete/:id', async (req, res) => {
+app.post('/admin/delete/*', async (req, res) => {
+  const id = req.params[0];
   const work = await readWork();
-  const item = work.find(w => w.id === req.params.id);
+  const item = work.find(w => w.id === id);
   if (item) {
     try {
-      const publicId = item.file.match(/\/ayrus-creatives\/([^.]+)/)?.[1];
-      if (publicId) {
-        await cloudinary.uploader.destroy('ayrus-creatives/' + publicId, { resource_type: item.isVideo ? 'video' : 'image' });
-      }
+      await cloudinary.uploader.destroy(item.public_id, { resource_type: item.isVideo ? 'video' : 'image' });
     } catch (err) {
       console.error('Cloudinary delete error:', err);
     }

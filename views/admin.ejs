@@ -97,7 +97,7 @@
             <div class="flex gap-2">
               <button data-edit-id="<%= item.public_id.replace(/\//g, '_') %>" onclick="toggleEdit(this.dataset.editId)"
                 class="text-xs text-white/40 hover:text-white transition-colors px-2 py-1">Edit</button>
-              <form action="/admin/delete/<%= item.id %>" method="POST" onsubmit="return confirm('Delete this item?')">
+              <form action="/admin/delete/<%= item.public_id %>" method="POST" onsubmit="return confirm('Delete this item?')">
                 <button type="submit" class="text-xs text-red-400/60 hover:text-red-400 transition-colors px-2 py-1">Delete</button>
               </form>
             </div>
