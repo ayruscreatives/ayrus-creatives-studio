@@ -107,7 +107,7 @@ app.post('/admin/update', async (req, res) => {
 app.post('/admin/delete/*', async (req, res) => {
   const id = req.params[0];
   const work = await readWork();
-  const item = work.find(w => w.id === id);
+  const item = work.find(w => w.public_id === id);
   if (item) {
     try {
       await cloudinary.uploader.destroy(item.public_id, { resource_type: item.isVideo ? 'video' : 'image' });
