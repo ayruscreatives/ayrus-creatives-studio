@@ -77,21 +77,60 @@
       <% } else { %>
       <div class="space-y-3">
         <% work.forEach(function(item) { %>
-        <div class="bg-[#161616] rounded-sm p-4 flex items-center gap-4">
-          <div class="w-14 h-14 bg-[#1C1C1C] rounded-sm overflow-hidden flex-shrink-0">
-            <% if (item.file && item.isVideo) { %>
-              <video src="<%= item.file %>" class="w-full h-full object-cover" muted></video>
-            <% } else if (item.file) { %>
-              <img src="<%= item.file %>" alt="<%= item.brand %>" class="w-full h-full object-cover" />
-            <% } %>
+        <div class="bg-[#161616] rounded-sm p-4">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 bg-[#1C1C1C] rounded-sm overflow-hidden flex-shrink-0">
+              <% if (item.file && item.isVideo) { %>
+                <video src="<%= item.file %>" class="w-full h-full object-cover" muted></video>
+              <% } else if (item.file) { %>
+                <img src="<%= item.file %>" alt="<%= item.brand %>" class="w-full h-full object-cover" />
+              <% } %>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-sm"><%= item.brand || '(no brand)' %></p>
+              <p class="text-white/30 text-xs mt-0.5"><%= item.type || '(no type)' %> &bull; <%= item.brief || '(no brief)' %></p>
+            </div>
+            <div class="flex gap-2">
+              <button data-edit-id="<%= item.public_id.replace(/\//g, '_') %>" onclick="toggleEdit(this.dataset.editId)"
+                class="text-xs text-white/40 hover:text-white transition-colors px-2 py-1">Edit</button>
+              <form action="/admin/delete/<%= item.id %>" method="POST" onsubmit="return confirm('Delete this item?')">
+                <button type="submit" class="text-xs text-red-400/60 hover:text-red-400 transition-colors px-2 py-1">Delete</button>
+              </form>
+            </div>
           </div>
-          <div class="flex-1 min-w-0">
-            <p class="font-medium text-sm"><%= item.brand %></p>
-            <p class="text-white/30 text-xs mt-0.5"><%= item.type %> &bull; <%= item.brief %></p>
+          <!-- Edit Form (hidden by default) -->
+          <div id="edit-<%= item.public_id.replace(/\//g, '_') %>" class="hidden mt-4 pt-4 border-t border-white/10">
+            <form action="/admin/update" method="POST" class="space-y-3">
+              <input type="hidden" name="public_id" value="<%= item.public_id %>" />
+              <input type="hidden" name="isVideo" value="<%= item.isVideo %>" />
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs text-white/40 mb-1">Brand Name</label>
+                  <input type="text" name="brand" value="<%= item.brand %>" required
+                    class="w-full bg-[#0F0F0F] border border-white/10 rounded-sm px-3 py-2 text-sm text-white focus:outline-none focus:border-white/30" />
+                </div>
+                <div>
+                  <label class="block text-xs text-white/40 mb-1">Output Type</label>
+                  <select name="type" required
+                    class="w-full bg-[#0F0F0F] border border-white/10 rounded-sm px-3 py-2 text-sm text-white focus:outline-none focus:border-white/30">
+                    <option value="Stills" <%= item.type==='Stills'?'selected':'' %>>Stills</option>
+                    <option value="Motion" <%= item.type==='Motion'?'selected':'' %>>Motion</option>
+                    <option value="UGC" <%= item.type==='UGC'?'selected':'' %>>UGC</option>
+                    <option value="Brand Identity" <%= item.type==='Brand Identity'?'selected':'' %>>Brand Identity</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs text-white/40 mb-1">One-line Brief</label>
+                <input type="text" name="brief" value="<%= item.brief %>" required maxlength="140"
+                  class="w-full bg-[#0F0F0F] border border-white/10 rounded-sm px-3 py-2 text-sm text-white focus:outline-none focus:border-white/30" />
+              </div>
+              <button type="submit"
+                class="bg-white/10 text-white px-4 py-2 rounded-sm text-xs font-medium hover:bg-white/20 transition-colors">
+                Save Changes
+              </button>
+            </form>
           </div>
-          <form action="/admin/delete/<%= item.id %>" method="POST" onsubmit="return confirm('Delete this item?')">
-            <button type="submit" class="text-xs text-red-400/60 hover:text-red-400 transition-colors px-2 py-1">Delete</button>
-          </form>
         </div>
         <% }); %>
       </div>
@@ -99,5 +138,11 @@
     </div>
 
   </div>
+  <script>
+    function toggleEdit(id) {
+      var el = document.getElementById('edit-' + id);
+      el.classList.toggle('hidden');
+    }
+  </script>
 </body>
 </html>
