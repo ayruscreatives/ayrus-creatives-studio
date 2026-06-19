@@ -761,7 +761,18 @@
     .package-deliverables {
       list-style: none;
       flex: 1;
-      margin-bottom: 32px;
+      margin-bottom: 24px;
+    }
+    .package-context {
+      font-family: var(--body-font);
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 24px;
+      padding: 12px;
+      background: rgba(0,0,0,0.03);
+      border-left: 2px solid var(--accent);
+      border-radius: 0 4px 4px 0;
     }
     .package-deliverables li {
       font-family: var(--body-font);
@@ -1154,7 +1165,7 @@
     </div>
 
     <div class="hero-bottom">
-      <a href="https://wa.me/917666550465" target="_blank" rel="noopener" class="btn-wa" aria-label="Chat on WhatsApp">
+      <a href="https://wa.me/917666550465?text=Hi%2C%20I%20came%20across%20your%20work%20and%20would%20love%20to%20explore%20a%20creative%20collaboration%20for%20my%20brand." target="_blank" rel="noopener" class="btn-wa" aria-label="Chat on WhatsApp">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
         </svg>
@@ -1334,6 +1345,7 @@
           <li>1 Hyper Motion</li>
           <li>1 UGC Video</li>
         </ul>
+        <p class="package-context">A single traditional product photoshoot in any metro city starts at ₹35,000 and gives you one set of images. This gives you a complete visual system.</p>
         <a href="https://wa.me/917666550465?text=Hi%2C%20I'm%20interested%20in%20the%20Brand%20Foundation%20package" target="_blank" rel="noopener" class="package-cta">Get Started &#8594;</a>
       </article>
 
@@ -1352,6 +1364,7 @@
           <li>1 Unboxing Video</li>
           <li>3 UGC Videos</li>
         </ul>
+        <p class="package-context">Most brands spend ₹60,000–₹80,000 on just a campaign shoot and ad creatives separately. This delivers both plus motion, UGC, and a full launch kit.</p>
         <a href="https://wa.me/917666550465?text=Hi%2C%20I'm%20interested%20in%20the%20Campaign%20Launch%20package" target="_blank" rel="noopener" class="package-cta">Get Started &#8594;</a>
       </article>
 
@@ -1370,6 +1383,7 @@
           <li>2 Unboxing Videos</li>
           <li>6 UGC Videos</li>
         </ul>
+        <p class="package-context">Hiring a freelance photographer, videographer, and UGC creator separately for this scope would run ₹1.8–2.5L minimum without creative direction or brand consistency.</p>
         <a href="https://wa.me/917666550465?text=Hi%2C%20I'm%20interested%20in%20the%20Full%20Production%20Pipeline%20package" target="_blank" rel="noopener" class="package-cta">Get Started &#8594;</a>
       </article>
 
@@ -1454,11 +1468,12 @@
         </ul>
       </div>
 
-      <form class="contact-form reveal" onsubmit="handleFormSubmit(event)">
+      <form class="contact-form reveal" id="contactForm" onsubmit="handleFormSubmit(event)">
         <input class="form-input" type="text" name="name" placeholder="Your name" required />
         <input class="form-input" type="email" name="email" placeholder="Your email" required />
         <textarea class="form-textarea" name="message" placeholder="Tell us about your project&#8230;" required></textarea>
-        <button type="submit" class="form-submit">
+        <div id="form-status" style="display:none;font-size:0.875rem;padding:10px 14px;border-radius:8px;"></div>
+        <button type="submit" class="form-submit" id="form-btn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;vertical-align:middle"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           Send Message
         </button>
@@ -1635,14 +1650,41 @@
     }, { passive: true });
 
     // ─── Contact form ─────────────────────────────────────
-    function handleFormSubmit(e) {
+    async function handleFormSubmit(e) {
       e.preventDefault();
       var form = e.target;
-      var name = form.name.value;
-      var email = form.email.value;
-      var message = form.message.value;
-      var waText = encodeURIComponent('Hi, I\'m ' + name + ' (' + email + ').\n\n' + message);
-      window.open('https://wa.me/917666550465?text=' + waText, '_blank');
+      var btn = document.getElementById('form-btn');
+      var status = document.getElementById('form-status');
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+      status.style.display = 'none';
+      try {
+        var res = await fetch('/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: form.name.value,
+            email: form.email.value,
+            message: form.message.value
+          })
+        });
+        if (res.ok) {
+          status.style.display = 'block';
+          status.style.background = 'rgba(168,125,245,0.1)';
+          status.style.color = '#A87DF5';
+          status.textContent = 'Message sent! We\'ll get back to you soon.';
+          form.reset();
+        } else {
+          throw new Error('Failed');
+        }
+      } catch(err) {
+        status.style.display = 'block';
+        status.style.background = 'rgba(239,68,68,0.1)';
+        status.style.color = '#ef4444';
+        status.textContent = 'Something went wrong. Please try again.';
+      }
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;vertical-align:middle"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Send Message';
     }
   </script>
 </body>

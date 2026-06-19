@@ -2,6 +2,7 @@
 const express = require('express');
 const path = require('path');
 const { v2: cloudinary } = require('cloudinary');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -116,6 +117,35 @@ app.post('/admin/delete/*', async (req, res) => {
     }
   }
   res.redirect('/admin');
+});
+
+app.post('/contact', async (req, res) => {
+  const { name, email, message } = req.body;
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASS,
+      },
+    });
+    await transporter.sendMail({
+      from: `"Ayrus Creatives Website" <${process.env.GMAIL_USER}>`,
+      to: 'ayrus.creativestudio@gmail.com',
+      replyTo: email,
+      subject: `New enquiry from ${name}`,
+      html: `
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Message:</strong></p>
+        <p>${message.replace(/\n/g, '<br>')}</p>
+      `,
+    });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Email error:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.listen(PORT, () => console.log(`Ayrus Creatives running on port ${PORT}`));
