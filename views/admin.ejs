@@ -15,15 +15,52 @@
     body { background: #0F0F0F; color: #F5F3EE; font-family: 'Inter', sans-serif; }
   </style>
 </head>
-<body class="min-h-screen">
-  <div class="max-w-3xl mx-auto px-6 py-12">
+<body class="min-h-screen flex flex-col">
+
+  <% if (!loggedIn) { %>
+  <!-- ── Login Page ── -->
+  <div class="flex-1 flex items-center justify-center px-6">
+    <div class="w-full max-w-sm">
+      <div class="text-center mb-8">
+        <p class="text-xs tracking-widest uppercase text-white/30 mb-2">Ayrus Creatives</p>
+        <h1 class="text-2xl font-semibold">Admin Access</h1>
+        <p class="text-sm text-white/30 mt-1">Enter your password to continue</p>
+      </div>
+      <% if (message) { %>
+      <div class="bg-red-900/30 border border-red-500/30 text-red-300 text-sm px-4 py-3 rounded-sm mb-5">
+        <%= message %>
+      </div>
+      <% } %>
+      <form action="/admin/login" method="POST" class="space-y-4">
+        <div>
+          <label class="block text-xs text-white/40 mb-1.5">Password</label>
+          <input type="password" name="password" autofocus required
+            class="w-full bg-[#161616] border border-white/10 rounded-sm px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/30" />
+        </div>
+        <button type="submit"
+          class="w-full bg-[#C8A97A] text-black py-3 rounded-sm text-sm font-medium hover:bg-[#b8956a] transition-colors">
+          Sign In
+        </button>
+      </form>
+      <p class="text-center mt-6"><a href="/" class="text-xs text-white/20 hover:text-white/50 transition-colors">← Back to site</a></p>
+    </div>
+  </div>
+
+  <% } else { %>
+  <!-- ── Admin Panel ── -->
+  <div class="max-w-3xl mx-auto px-6 py-12 w-full">
 
     <div class="flex items-center justify-between mb-10">
       <div>
-        <p class="text-xs tracking-widest uppercase text-white/30 mb-1">Hidden Route</p>
+        <p class="text-xs tracking-widest uppercase text-white/30 mb-1">Admin Panel</p>
         <h1 class="text-2xl font-semibold">Work Upload Admin</h1>
       </div>
-      <a href="/" class="text-xs text-white/30 hover:text-white transition-colors">← View Site</a>
+      <div class="flex items-center gap-4">
+        <a href="/" class="text-xs text-white/30 hover:text-white transition-colors">← View Site</a>
+        <form action="/admin/logout" method="POST">
+          <button type="submit" class="text-xs text-white/30 hover:text-red-400 transition-colors">Logout</button>
+        </form>
+      </div>
     </div>
 
     <% if (message) { %>
@@ -47,16 +84,30 @@
           <select id="type"
             class="w-full bg-[#0F0F0F] border border-white/10 rounded-sm px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/30">
             <option value="">Select type…</option>
-            <option value="Stills">Stills</option>
-            <option value="Motion">Motion</option>
             <option value="UGC">UGC</option>
             <option value="Brand Identity">Brand Identity</option>
+            <option value="Hyper Motion">Hyper Motion</option>
+            <option value="Cinematic Stills">Cinematic Stills</option>
+            <option value="ASMR">ASMR</option>
+            <option value="Unboxing">Unboxing</option>
           </select>
         </div>
         <div>
           <label class="block text-xs text-white/40 mb-1.5">One-line Brief</label>
           <input type="text" id="brief" maxlength="140" placeholder="e.g. Hero product stills for Diwali launch campaign"
             class="w-full bg-[#0F0F0F] border border-white/10 rounded-sm px-3 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/30" />
+        </div>
+        <div>
+          <label class="block text-xs text-white/40 mb-1.5">Homepage Position <span class="text-white/20">(optional)</span></label>
+          <select id="position"
+            class="w-full bg-[#0F0F0F] border border-white/10 rounded-sm px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/30">
+            <option value="">— None —</option>
+            <option value="featured">Featured (large left)</option>
+            <option value="side-1">Side 1 (top-middle, row 1)</option>
+            <option value="side-2">Side 2 (top-middle, row 2)</option>
+            <option value="side-3">Side 3 (top-right, row 1)</option>
+            <option value="side-4">Side 4 (top-right, row 2)</option>
+          </select>
         </div>
         <div>
           <label class="block text-xs text-white/40 mb-1.5">Asset (image or video)</label>
@@ -117,10 +168,12 @@
                   <label class="block text-xs text-white/40 mb-1">Output Type</label>
                   <select name="type" required
                     class="w-full bg-[#0F0F0F] border border-white/10 rounded-sm px-3 py-2 text-sm text-white focus:outline-none focus:border-white/30">
-                    <option value="Stills" <%= item.type==='Stills'?'selected':'' %>>Stills</option>
-                    <option value="Motion" <%= item.type==='Motion'?'selected':'' %>>Motion</option>
                     <option value="UGC" <%= item.type==='UGC'?'selected':'' %>>UGC</option>
                     <option value="Brand Identity" <%= item.type==='Brand Identity'?'selected':'' %>>Brand Identity</option>
+                    <option value="Hyper Motion" <%= item.type==='Hyper Motion'?'selected':'' %>>Hyper Motion</option>
+                    <option value="Cinematic Stills" <%= item.type==='Cinematic Stills'?'selected':'' %>>Cinematic Stills</option>
+                    <option value="ASMR" <%= item.type==='ASMR'?'selected':'' %>>ASMR</option>
+                    <option value="Unboxing" <%= item.type==='Unboxing'?'selected':'' %>>Unboxing</option>
                   </select>
                 </div>
               </div>
@@ -128,6 +181,18 @@
                 <label class="block text-xs text-white/40 mb-1">One-line Brief</label>
                 <input type="text" name="brief" value="<%= item.brief %>" required maxlength="140"
                   class="w-full bg-[#0F0F0F] border border-white/10 rounded-sm px-3 py-2 text-sm text-white focus:outline-none focus:border-white/30" />
+              </div>
+              <div>
+                <label class="block text-xs text-white/40 mb-1">Homepage Position <span class="text-white/20">(pin to bento slot)</span></label>
+                <select name="position"
+                  class="w-full bg-[#0F0F0F] border border-white/10 rounded-sm px-3 py-2 text-sm text-white focus:outline-none focus:border-white/30">
+                  <option value="" <%= !item.position?'selected':'' %>>— None —</option>
+                  <option value="featured" <%= item.position==='featured'?'selected':'' %>>Featured (large left)</option>
+                  <option value="side-1" <%= item.position==='side-1'?'selected':'' %>>Side 1 (top-middle, row 1)</option>
+                  <option value="side-2" <%= item.position==='side-2'?'selected':'' %>>Side 2 (top-middle, row 2)</option>
+                  <option value="side-3" <%= item.position==='side-3'?'selected':'' %>>Side 3 (top-right, row 1)</option>
+                  <option value="side-4" <%= item.position==='side-4'?'selected':'' %>>Side 4 (top-right, row 2)</option>
+                </select>
               </div>
               <button type="submit"
                 class="bg-white/10 text-white px-4 py-2 rounded-sm text-xs font-medium hover:bg-white/20 transition-colors">
@@ -152,6 +217,7 @@
       const brand = document.getElementById('brand').value.trim();
       const type = document.getElementById('type').value;
       const brief = document.getElementById('brief').value.trim();
+      const position = document.getElementById('position').value;
       const file = document.getElementById('asset').files[0];
       const msgEl = document.getElementById('upload-message');
       const progress = document.getElementById('upload-progress');
@@ -198,7 +264,7 @@
       const saveRes = await fetch('/admin/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ brand, type, brief, public_id: uploaded.public_id, resource_type: resourceType }),
+        body: JSON.stringify({ brand, type, brief, position, public_id: uploaded.public_id, resource_type: resourceType }),
       });
 
       progress.classList.add('hidden');
@@ -218,5 +284,7 @@
       }
     }
   </script>
+
+  <% } %>
 </body>
 </html>

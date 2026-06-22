@@ -1,6 +1,7 @@
 ﻿require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const session = require('express-session');
 const { v2: cloudinary } = require('cloudinary');
 const { Resend } = require('resend');
 
@@ -18,6 +19,12 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'ayrus-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 8 * 60 * 60 * 1000 }, // 8 hours
+}));
 
 async function readWork() {
   try {
@@ -35,6 +42,7 @@ async function readWork() {
         brand: r.context?.custom?.brand || '',
         type: r.context?.custom?.type || '',
         brief: r.context?.custom?.brief || '',
+        position: r.context?.custom?.position || '',
         file: r.secure_url,
         isVideo: r.resource_type === 'video',
         created_at: r.created_at,
@@ -52,8 +60,26 @@ app.get('/', async (req, res) => {
 });
 
 app.get('/admin', async (req, res) => {
+  if (!req.session.isAdmin) {
+    return res.render('admin', { loggedIn: false, work: [], message: null });
+  }
   const work = await readWork();
-  res.render('admin', { work, message: null });
+  res.render('admin', { loggedIn: true, work, message: null });
+});
+
+app.post('/admin/login', (req, res) => {
+  const { password } = req.body;
+  if (password === process.env.ADMIN_PASSWORD) {
+    req.session.isAdmin = true;
+    res.redirect('/admin');
+  } else {
+    res.render('admin', { loggedIn: false, work: [], message: 'Incorrect password. Try again.' });
+  }
+});
+
+app.post('/admin/logout', (req, res) => {
+  req.session.destroy();
+  res.redirect('/admin');
 });
 
 // Generate signature for direct browser → Cloudinary upload
@@ -71,14 +97,14 @@ app.get('/admin/sign-upload', (req, res) => {
 
 // Save metadata after browser uploads file directly to Cloudinary
 app.post('/admin/upload', async (req, res) => {
-  const { brand, type, brief, public_id, resource_type } = req.body;
+  const { brand, type, brief, position, public_id, resource_type } = req.body;
   const work_id = Date.now().toString();
   try {
     const isVideo = resource_type === 'video';
     await cloudinary.uploader.explicit(public_id, {
       type: 'upload',
       resource_type: isVideo ? 'video' : 'image',
-      context: `work_id=${work_id}|brand=${brand}|type=${type}|brief=${brief}`,
+      context: `work_id=${work_id}|brand=${brand}|type=${type}|brief=${brief}|position=${position || ''}`,
     });
     res.json({ ok: true });
   } catch (err) {
@@ -88,20 +114,20 @@ app.post('/admin/upload', async (req, res) => {
 });
 
 app.post('/admin/update', async (req, res) => {
-  const { public_id, brand, type, brief, isVideo } = req.body;
+  const { public_id, brand, type, brief, position, isVideo } = req.body;
   try {
     const work_id = Date.now().toString();
     await cloudinary.uploader.explicit(public_id, {
       type: 'upload',
       resource_type: isVideo === 'true' ? 'video' : 'image',
-      context: `work_id=${work_id}|brand=${brand}|type=${type}|brief=${brief}`,
+      context: `work_id=${work_id}|brand=${brand}|type=${type}|brief=${brief}|position=${position || ''}`,
     });
     const work = await readWork();
-    res.render('admin', { work, message: 'Updated successfully.' });
+    res.render('admin', { loggedIn: true, work, message: 'Updated successfully.' });
   } catch (err) {
     console.error('Cloudinary update error:', err);
     const work = await readWork();
-    res.render('admin', { work, message: 'Update failed: ' + err.message });
+    res.render('admin', { loggedIn: true, work, message: 'Update failed: ' + err.message });
   }
 });
 

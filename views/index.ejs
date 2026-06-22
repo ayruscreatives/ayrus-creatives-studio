@@ -401,7 +401,7 @@
       background: var(--bg-alt);
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
-      padding: 3px 0;
+      padding: 18px 0;
       overflow: hidden;
     }
     .marquee-track-wrapper {
@@ -506,11 +506,146 @@
       background: var(--bg-alt);
       padding: 112px 80px;
     }
-    .work-grid {
+
+    /* ── Bento layout ───────────────────────── */
+    .work-bento {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: 260px 260px 534px 300px;
       gap: 14px;
     }
+    /* Featured media: col 1-2, rows 1-2 */
+    .wb-featured { grid-column: 1/3; grid-row: 1/3; aspect-ratio: unset; }
+    /* Stacked picks col 3 */
+    .wb-pic1 { grid-column: 3/4; grid-row: 1/2; aspect-ratio: unset; }
+    .wb-pic2 { grid-column: 3/4; grid-row: 2/3; aspect-ratio: unset; }
+    /* Stacked picks col 4 */
+    .wb-pic3 { grid-column: 4/5; grid-row: 1/2; aspect-ratio: unset; }
+    .wb-pic4 { grid-column: 4/5; grid-row: 2/3; aspect-ratio: unset; }
+    /* Row 3 — 4 equal folders */
+    .wb-ugc    { grid-column: 1/2; grid-row: 3/4; }
+    .wb-bi     { grid-column: 2/3; grid-row: 3/4; }
+    .wb-motion { grid-column: 3/4; grid-row: 3/4; }
+    .wb-stills { grid-column: 4/5; grid-row: 3/4; }
+    /* Row 4 — 2 wide folders */
+    .wb-asmr     { grid-column: 1/3; grid-row: 4/5; }
+    .wb-unboxing { grid-column: 3/5; grid-row: 4/5; }
+
+    /* Folder card */
+    .work-folder {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px 20px;
+      cursor: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.2s, border-color 0.2s;
+    }
+    .work-folder.visible { opacity: 1; transform: translateY(0); }
+    .work-folder:hover {
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      border-color: var(--accent);
+    }
+    .work-folder-label {
+      font-family: var(--body-font);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .work-folder-title {
+      font-family: var(--heading-font);
+      font-weight: 900;
+      font-size: 1.1rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: var(--text);
+      line-height: 1.1;
+    }
+    .work-folder-count {
+      font-family: var(--body-font);
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .work-folder-preview {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 5px;
+      border-radius: 8px;
+      overflow: hidden;
+      flex: 1;
+    }
+    .work-folder-preview-item {
+      aspect-ratio: 1;
+      overflow: hidden;
+      background: var(--bg-alt);
+      border-radius: 4px;
+    }
+    .work-folder-preview-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+
+    /* Folder modal */
+    .folder-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 5000;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      padding: 40px 20px;
+      overflow-y: auto;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .folder-modal.open { opacity: 1; pointer-events: all; }
+    .folder-modal-inner {
+      background: var(--bg);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 1100px;
+      padding: 40px;
+      position: relative;
+    }
+    .folder-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+    .folder-modal-title {
+      font-family: var(--heading-font);
+      font-weight: 900;
+      font-size: 1.8rem;
+      text-transform: uppercase;
+    }
+    .folder-modal-close {
+      background: var(--bg-alt);
+      border: none;
+      border-radius: 50%;
+      width: 40px; height: 40px;
+      font-size: 1.2rem;
+      cursor: none;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .folder-modal-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    .folder-modal-grid .work-card { aspect-ratio: 5/3; opacity: 1; transform: none; }
+
+    /* Shared card styles */
     .work-card {
       position: relative;
       aspect-ratio: 5/3;
@@ -523,7 +658,6 @@
       transition: opacity 0.6s ease, transform 0.6s ease;
     }
     .work-card.visible { opacity: 1; transform: translateY(0); }
-
     .work-card img,
     .work-card video {
       width: 100%; height: 100%;
@@ -532,7 +666,6 @@
     }
     .work-card:hover img,
     .work-card:hover video { transform: scale(1.05); }
-    /* Always-visible base gradient for readability */
     .work-card::after {
       content: '';
       position: absolute;
@@ -548,7 +681,7 @@
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
-      padding: 24px;
+      padding: 20px;
       opacity: 0;
       transition: opacity 0.3s ease;
       z-index: 2;
@@ -558,17 +691,17 @@
     .work-brand {
       font-family: var(--heading-font);
       font-weight: 800;
-      font-size: 1.3rem;
+      font-size: 1.1rem;
       letter-spacing: -0.01em;
       color: #fff;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
     .work-type-tag {
       display: inline-block;
       align-self: flex-start;
       font-family: var(--body-font);
       font-weight: 500;
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       color: #fff;
       background: rgba(255,255,255,0.15);
       border: 1px solid rgba(255,255,255,0.3);
@@ -576,17 +709,16 @@
       border-radius: 50px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .work-brief {
       font-family: var(--body-font);
       font-weight: 600;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: rgba(255,255,255,0.9);
       line-height: 1.5;
     }
     .work-empty {
-      grid-column: 1 / -1;
       text-align: center;
       padding: 80px 40px;
       color: var(--muted);
@@ -1094,7 +1226,11 @@
       .stats-strip { padding: 40px 24px; }
       .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
       .work-section, .services-section, .packages-section, .about-section, .contact-section { padding: 72px 24px; }
-      .work-grid { grid-template-columns: repeat(2, 1fr); }
+      .work-bento { grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
+      .wb-featured { grid-column: 1/3; grid-row: auto; }
+      .wb-pic1, .wb-pic2, .wb-pic3, .wb-pic4 { grid-column: auto; grid-row: auto; }
+      .wb-ugc, .wb-bi, .wb-motion, .wb-stills { grid-column: auto; grid-row: auto; }
+      .wb-asmr, .wb-unboxing { grid-column: auto; grid-row: auto; }
       .services-bento { grid-template-columns: 1fr; }
       .service-card:nth-child(1), .service-card:nth-child(6) { grid-column: span 1; }
       .packages-grid { grid-template-columns: 1fr; }
@@ -1214,38 +1350,240 @@
       <h2 class="section-title">Our Projects</h2>
     </div>
 
-    <div class="work-grid">
-      <% if (work && work.length > 0) { %>
-        <% work.forEach(function(item, index) { %>
-          <article
-            class="work-card"
-            data-index="<%= index %>"
-            onclick="openModal(<%= index %>)"
-            style="transition-delay: <%= (index % 3) * 0.1 %>s"
-            aria-label="<%= item.brand %> &#8212; <%= item.type %>"
-          >
-            <% if (item.isVideo) { %>
-              <%
-                var posterUrl = item.file.replace('/upload/', '/upload/w_400,h_240,c_fill,q_auto,so_0/').replace(/\.(mp4|mov|webm)$/i, '.jpg');
-              %>
-              <video src="<%= item.file %>" poster="<%= posterUrl %>" muted loop playsinline preload="metadata"></video>
-            <% } else { %>
-              <img src="<%= item.file %>" alt="<%= item.brand %>" loading="lazy" />
-            <% } %>
-            <div class="work-overlay">
-              <span class="work-type-tag"><%= item.type %></span>
-              <p class="work-brand"><%= item.brand %></p>
-              <p class="work-brief"><%= item.brief %></p>
-            </div>
-          </article>
-        <% }); %>
-      <% } else { %>
-        <div class="work-empty">
-          <span>&#10022;</span>
-          <p>Projects coming soon.</p>
+    <% if (work && work.length > 0) { %>
+    <%
+      var byType = { 'UGC': [], 'Brand Identity': [], 'Hyper Motion': [], 'Cinematic Stills': [], 'ASMR': [], 'Unboxing': [] };
+      work.forEach(function(i){ if(byType[i.type] !== undefined) byType[i.type].push(i); });
+      var vids = work.filter(function(i){ return i.isVideo; });
+      var imgs = work.filter(function(i){ return !i.isVideo; });
+      var pinned = {};
+      work.forEach(function(i){ if(i.position) pinned[i.position] = i; });
+      var bentoFeat = pinned['featured'] || vids[0] || imgs[0] || null;
+      var usedIds = {};
+      if(bentoFeat) usedIds[bentoFeat.public_id] = true;
+      ['side-1','side-2','side-3','side-4'].forEach(function(p){ if(pinned[p]) usedIds[pinned[p].public_id] = true; });
+      var sideImgs = work.filter(function(i){ return !usedIds[i.public_id] && !i.isVideo; });
+      var sideVids = work.filter(function(i){ return !usedIds[i.public_id] && i.isVideo; });
+      var sideFallback = sideImgs.concat(sideVids);
+      var bentoPic1 = pinned['side-1'] || sideFallback[0] || null;
+      var bentoPic2 = pinned['side-2'] || sideFallback[1] || null;
+      var bentoPic3 = pinned['side-3'] || sideFallback[2] || null;
+      var bentoPic4 = pinned['side-4'] || sideFallback[3] || null;
+    %>
+    <div class="work-bento">
+
+      <!-- Featured media: col 1-2, rows 1-2 -->
+      <% if (bentoFeat) { var fi = work.indexOf(bentoFeat); %>
+      <article class="work-card wb-featured reveal" onclick="openModal(<%= fi %>)" aria-label="<%= bentoFeat.brand %>">
+        <% if (bentoFeat.isVideo) { %>
+          <% var fposter = bentoFeat.file.replace('/upload/', '/upload/w_800,h_600,c_fill,q_auto,so_0/').replace(/\.(mp4|mov|webm)$/i, '.jpg'); %>
+          <video src="<%= bentoFeat.file %>" poster="<%= fposter %>" muted loop playsinline preload="metadata"></video>
+        <% } else { %>
+          <img src="<%= bentoFeat.file %>" alt="<%= bentoFeat.brand %>" loading="lazy" />
+        <% } %>
+        <div class="work-overlay">
+          <span class="work-type-tag"><%= bentoFeat.type %></span>
+          <p class="work-brand"><%= bentoFeat.brand %></p>
+          <p class="work-brief"><%= bentoFeat.brief %></p>
         </div>
+      </article>
       <% } %>
+
+      <!-- Pic 1: col 3, row 1 -->
+      <% if (bentoPic1) { var p1i = work.indexOf(bentoPic1); %>
+      <article class="work-card wb-pic1 reveal" onclick="openModal(<%= p1i %>)" aria-label="<%= bentoPic1.brand %>">
+        <% if (bentoPic1.isVideo) { %>
+          <% var p1poster = bentoPic1.file.replace('/upload/', '/upload/w_400,h_300,c_fill,q_auto,so_0/').replace(/\.(mp4|mov|webm)$/i, '.jpg'); %>
+          <video src="<%= bentoPic1.file %>" poster="<%= p1poster %>" muted loop playsinline preload="metadata"></video>
+        <% } else { %>
+          <img src="<%= bentoPic1.file %>" alt="<%= bentoPic1.brand %>" loading="lazy" />
+        <% } %>
+        <div class="work-overlay">
+          <span class="work-type-tag"><%= bentoPic1.type %></span>
+          <p class="work-brand"><%= bentoPic1.brand %></p>
+          <p class="work-brief"><%= bentoPic1.brief %></p>
+        </div>
+      </article>
+      <% } %>
+
+      <!-- Pic 2: col 3, row 2 -->
+      <% if (bentoPic2) { var p2i = work.indexOf(bentoPic2); %>
+      <article class="work-card wb-pic2 reveal" onclick="openModal(<%= p2i %>)" aria-label="<%= bentoPic2.brand %>">
+        <% if (bentoPic2.isVideo) { %>
+          <% var p2poster = bentoPic2.file.replace('/upload/', '/upload/w_400,h_300,c_fill,q_auto,so_0/').replace(/\.(mp4|mov|webm)$/i, '.jpg'); %>
+          <video src="<%= bentoPic2.file %>" poster="<%= p2poster %>" muted loop playsinline preload="metadata"></video>
+        <% } else { %>
+          <img src="<%= bentoPic2.file %>" alt="<%= bentoPic2.brand %>" loading="lazy" />
+        <% } %>
+        <div class="work-overlay">
+          <span class="work-type-tag"><%= bentoPic2.type %></span>
+          <p class="work-brand"><%= bentoPic2.brand %></p>
+          <p class="work-brief"><%= bentoPic2.brief %></p>
+        </div>
+      </article>
+      <% } %>
+
+      <!-- Pic 3: col 4, row 1 -->
+      <% if (bentoPic3) { var p3i = work.indexOf(bentoPic3); %>
+      <article class="work-card wb-pic3 reveal" onclick="openModal(<%= p3i %>)" aria-label="<%= bentoPic3.brand %>">
+        <% if (bentoPic3.isVideo) { %>
+          <% var p3poster = bentoPic3.file.replace('/upload/', '/upload/w_400,h_300,c_fill,q_auto,so_0/').replace(/\.(mp4|mov|webm)$/i, '.jpg'); %>
+          <video src="<%= bentoPic3.file %>" poster="<%= p3poster %>" muted loop playsinline preload="metadata"></video>
+        <% } else { %>
+          <img src="<%= bentoPic3.file %>" alt="<%= bentoPic3.brand %>" loading="lazy" />
+        <% } %>
+        <div class="work-overlay">
+          <span class="work-type-tag"><%= bentoPic3.type %></span>
+          <p class="work-brand"><%= bentoPic3.brand %></p>
+          <p class="work-brief"><%= bentoPic3.brief %></p>
+        </div>
+      </article>
+      <% } %>
+
+      <!-- Pic 4: col 4, row 2 -->
+      <% if (bentoPic4) { var p4i = work.indexOf(bentoPic4); %>
+      <article class="work-card wb-pic4 reveal" onclick="openModal(<%= p4i %>)" aria-label="<%= bentoPic4.brand %>">
+        <% if (bentoPic4.isVideo) { %>
+          <% var p4poster = bentoPic4.file.replace('/upload/', '/upload/w_400,h_300,c_fill,q_auto,so_0/').replace(/\.(mp4|mov|webm)$/i, '.jpg'); %>
+          <video src="<%= bentoPic4.file %>" poster="<%= p4poster %>" muted loop playsinline preload="metadata"></video>
+        <% } else { %>
+          <img src="<%= bentoPic4.file %>" alt="<%= bentoPic4.brand %>" loading="lazy" />
+        <% } %>
+        <div class="work-overlay">
+          <span class="work-type-tag"><%= bentoPic4.type %></span>
+          <p class="work-brand"><%= bentoPic4.brand %></p>
+          <p class="work-brief"><%= bentoPic4.brief %></p>
+        </div>
+      </article>
+      <% } %>
+
+      <!-- UGC folder: col 1, row 3 -->
+      <div class="work-folder wb-ugc reveal" onclick="openFolder('UGC')">
+        <p class="work-folder-label">Category</p>
+        <p class="work-folder-title">UGC</p>
+        <p class="work-folder-count"><%= byType['UGC'].length %> pieces</p>
+        <div class="work-folder-preview">
+          <% byType['UGC'].slice(0,4).forEach(function(item) { %>
+          <div class="work-folder-preview-item">
+            <% if (item.isVideo) { %>
+              <img src="<%= item.file.replace('/upload/', '/upload/w_300,h_225,c_fill,q_auto,so_0/').replace(/\.(mp4|mov|webm)$/i, '.jpg') %>" alt="<%= item.brand %>" />
+            <% } else { %>
+              <img src="<%= item.file.replace('/upload/', '/upload/w_300,h_225,c_fill,q_auto/') %>" alt="<%= item.brand %>" loading="lazy" />
+            <% } %>
+          </div>
+          <% }); %>
+        </div>
+      </div>
+
+      <!-- Brand Identity folder: col 1, row 3 -->
+      <div class="work-folder wb-bi reveal" onclick="openFolder('Brand Identity')">
+        <p class="work-folder-label">Category</p>
+        <p class="work-folder-title">Brand Identity</p>
+        <p class="work-folder-count"><%= byType['Brand Identity'].length %> pieces</p>
+        <div class="work-folder-preview">
+          <% byType['Brand Identity'].slice(0,4).forEach(function(item) { %>
+          <div class="work-folder-preview-item">
+            <% if (item.isVideo) { %>
+              <img src="<%= item.file.replace('/upload/', '/upload/w_300,h_225,c_fill,q_auto,so_0/').replace(/\.(mp4|mov|webm)$/i, '.jpg') %>" alt="<%= item.brand %>" />
+            <% } else { %>
+              <img src="<%= item.file.replace('/upload/', '/upload/w_300,h_225,c_fill,q_auto/') %>" alt="<%= item.brand %>" loading="lazy" />
+            <% } %>
+          </div>
+          <% }); %>
+        </div>
+      </div>
+
+      <!-- Motion folder: col 2-3, row 3 (wide) -->
+      <div class="work-folder wb-motion reveal" onclick="openFolder('Hyper Motion')">
+        <p class="work-folder-label">Category</p>
+        <p class="work-folder-title">Hyper Motion</p>
+        <p class="work-folder-count"><%= byType['Hyper Motion'].length %> pieces</p>
+        <div class="work-folder-preview">
+          <% byType['Hyper Motion'].slice(0,4).forEach(function(item) { %>
+          <div class="work-folder-preview-item">
+            <% if (item.isVideo) { %>
+              <img src="<%= item.file.replace('/upload/', '/upload/w_300,h_225,c_fill,q_auto,so_0/').replace(/\.(mp4|mov|webm)$/i, '.jpg') %>" alt="<%= item.brand %>" />
+            <% } else { %>
+              <img src="<%= item.file.replace('/upload/', '/upload/w_300,h_225,c_fill,q_auto/') %>" alt="<%= item.brand %>" loading="lazy" />
+            <% } %>
+          </div>
+          <% }); %>
+        </div>
+      </div>
+
+      <!-- Cinematic folder: col 4, row 3 -->
+      <div class="work-folder wb-stills reveal" onclick="openFolder('Cinematic Stills')">
+        <p class="work-folder-label">Category</p>
+        <p class="work-folder-title">Cinematic Stills</p>
+        <p class="work-folder-count"><%= byType['Cinematic Stills'].length %> pieces</p>
+        <div class="work-folder-preview">
+          <% byType['Cinematic Stills'].slice(0,4).forEach(function(item) { %>
+          <div class="work-folder-preview-item">
+            <% if (item.isVideo) { %>
+              <img src="<%= item.file.replace('/upload/', '/upload/w_300,h_225,c_fill,q_auto,so_0/').replace(/\.(mp4|mov|webm)$/i, '.jpg') %>" alt="<%= item.brand %>" />
+            <% } else { %>
+              <img src="<%= item.file.replace('/upload/', '/upload/w_300,h_225,c_fill,q_auto/') %>" alt="<%= item.brand %>" loading="lazy" />
+            <% } %>
+          </div>
+          <% }); %>
+        </div>
+      </div>
+
+      <!-- ASMR folder: col 5, row 3 -->
+      <div class="work-folder wb-asmr reveal" onclick="openFolder('ASMR')">
+        <p class="work-folder-label">Category</p>
+        <p class="work-folder-title">ASMR</p>
+        <p class="work-folder-count"><%= byType['ASMR'].length %> pieces</p>
+        <div class="work-folder-preview">
+          <% byType['ASMR'].slice(0,4).forEach(function(item) { %>
+          <div class="work-folder-preview-item">
+            <% if (item.isVideo) { %>
+              <img src="<%= item.file.replace('/upload/', '/upload/w_300,h_225,c_fill,q_auto,so_0/').replace(/\.(mp4|mov|webm)$/i, '.jpg') %>" alt="<%= item.brand %>" />
+            <% } else { %>
+              <img src="<%= item.file.replace('/upload/', '/upload/w_300,h_225,c_fill,q_auto/') %>" alt="<%= item.brand %>" loading="lazy" />
+            <% } %>
+          </div>
+          <% }); %>
+        </div>
+      </div>
+
+      <!-- Unboxing folder: col 6, row 3 -->
+      <div class="work-folder wb-unboxing reveal" onclick="openFolder('Unboxing')">
+        <p class="work-folder-label">Category</p>
+        <p class="work-folder-title">Unboxing</p>
+        <p class="work-folder-count"><%= byType['Unboxing'].length %> pieces</p>
+        <div class="work-folder-preview">
+          <% byType['Unboxing'].slice(0,4).forEach(function(item) { %>
+          <div class="work-folder-preview-item">
+            <% if (item.isVideo) { %>
+              <img src="<%= item.file.replace('/upload/', '/upload/w_300,h_225,c_fill,q_auto,so_0/').replace(/\.(mp4|mov|webm)$/i, '.jpg') %>" alt="<%= item.brand %>" />
+            <% } else { %>
+              <img src="<%= item.file.replace('/upload/', '/upload/w_300,h_225,c_fill,q_auto/') %>" alt="<%= item.brand %>" loading="lazy" />
+            <% } %>
+          </div>
+          <% }); %>
+        </div>
+      </div>
+
+    </div><!-- /work-bento -->
+
+    <!-- Folder modal -->
+    <div id="folderModal" class="folder-modal" onclick="if(event.target===this)closeFolder()">
+      <div class="folder-modal-inner">
+        <div class="folder-modal-header">
+          <h3 class="folder-modal-title" id="folderModalTitle"></h3>
+          <button class="folder-modal-close" onclick="closeFolder()">&#10005;</button>
+        </div>
+        <div class="folder-modal-grid" id="folderModalGrid"></div>
+      </div>
     </div>
+
+    <% } else { %>
+    <div class="work-empty">
+      <span>&#10022;</span>
+      <p>Projects coming soon.</p>
+    </div>
+    <% } %>
   </section>
 
   <!-- ─── SERVICES ──────────────────────────────────────── -->
@@ -1517,6 +1855,49 @@
   <script>
     // ─── Work data from EJS ───────────────────────────────
     var workData = <%- JSON.stringify(work || []) %>;
+
+    // ─── Folder open / close ─────────────────────────────
+    function openFolder(cat) {
+      var items = workData.filter(function(i){ return i.type === cat; });
+      document.getElementById('folderModalTitle').textContent = cat;
+      var grid = document.getElementById('folderModalGrid');
+      grid.innerHTML = '';
+      if (items.length === 0) {
+        grid.innerHTML = '<p style="color:var(--muted);grid-column:span 3;text-align:center;padding:40px">No items in this category yet.</p>';
+      } else {
+        items.forEach(function(item) {
+          var globalIdx = workData.indexOf(item);
+          var article = document.createElement('article');
+          article.className = 'work-card';
+          article.style.opacity = '1';
+          article.style.transform = 'none';
+          article.onclick = function(){ closeFolder(); openModal(globalIdx); };
+          if (item.isVideo) {
+            var poster = item.file.replace('/upload/', '/upload/w_400,h_240,c_fill,q_auto,so_0/').replace(/\.(mp4|mov|webm)$/i, '.jpg');
+            article.innerHTML = '<video src="' + item.file + '" poster="' + poster + '" muted loop playsinline preload="metadata"></video>';
+          } else {
+            article.innerHTML = '<img src="' + item.file + '" alt="' + item.brand + '" loading="lazy" />';
+          }
+          var overlay = document.createElement('div');
+          overlay.className = 'work-overlay';
+          overlay.innerHTML = '<span class="work-type-tag">' + item.type + '</span><p class="work-brand">' + item.brand + '</p><p class="work-brief">' + item.brief + '</p>';
+          article.appendChild(overlay);
+          grid.appendChild(article);
+          if (item.isVideo) {
+            var v = article.querySelector('video');
+            article.addEventListener('mouseenter', function(){ v.play(); });
+            article.addEventListener('mouseleave', function(){ v.pause(); });
+          }
+        });
+      }
+      document.getElementById('folderModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeFolder() {
+      document.getElementById('folderModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
 
     // ─── Custom cursor ────────────────────────────────────
     var dot = document.getElementById('cursor-dot');
