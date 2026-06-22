@@ -120,6 +120,8 @@ app.post('/admin/delete/*', async (req, res) => {
 });
 
 app.post('/contact', async (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Cache-Control', 'no-store');
   const { name, email, message } = req.body;
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
@@ -135,10 +137,10 @@ app.post('/contact', async (req, res) => {
         <p>${message.replace(/\n/g, '<br>')}</p>
       `,
     });
-    res.json({ ok: true });
+    res.end(JSON.stringify({ ok: true }));
   } catch (err) {
     console.error('Email error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).end(JSON.stringify({ error: err.message }));
   }
 });
 

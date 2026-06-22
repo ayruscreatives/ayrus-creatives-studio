@@ -1664,7 +1664,7 @@
       try {
         var res = await fetch('/contact', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({
             name: form.name.value,
             email: form.email.value,
