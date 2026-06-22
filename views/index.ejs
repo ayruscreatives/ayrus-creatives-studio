@@ -511,7 +511,7 @@
     .work-bento {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: 260px 260px 534px 420px 420px;
+      grid-template-rows: 260px 260px 534px 420px 660px;
       gap: 14px;
     }
     /* Featured media: col 1-2, rows 1-2 */
@@ -599,6 +599,23 @@
     }
     .wb-asmr .work-folder-preview-item img,
     .wb-unboxing .work-folder-preview-item img {
+      object-fit: cover;
+    }
+    .wb-billboard {
+      overflow: hidden;
+    }
+    .wb-billboard .work-folder-preview {
+      gap: 8px;
+      overflow: visible;
+      flex: unset;
+      border-radius: 0;
+    }
+    .wb-billboard .work-folder-preview-item {
+      aspect-ratio: 16/9;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .wb-billboard .work-folder-preview-item img {
       object-fit: cover;
     }
 
