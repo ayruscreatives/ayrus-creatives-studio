@@ -511,7 +511,7 @@
     .work-bento {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: 260px 260px 534px 300px;
+      grid-template-rows: 260px 260px 534px 420px 420px;
       gap: 14px;
     }
     /* Featured media: col 1-2, rows 1-2 */
@@ -530,6 +530,8 @@
     /* Row 4 — 2 wide folders */
     .wb-asmr     { grid-column: 1/3; grid-row: 4/5; }
     .wb-unboxing { grid-column: 3/5; grid-row: 4/5; }
+    /* Row 5 — Billboard */
+    .wb-billboard { grid-column: 1/3; grid-row: 5/6; }
 
     /* Folder card */
     .work-folder {
@@ -589,6 +591,14 @@
     }
     .work-folder-preview-item img {
       width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .wb-asmr .work-folder-preview-item,
+    .wb-unboxing .work-folder-preview-item {
+      aspect-ratio: 16/9;
+    }
+    .wb-asmr .work-folder-preview-item img,
+    .wb-unboxing .work-folder-preview-item img {
       object-fit: cover;
     }
 
@@ -1230,7 +1240,7 @@
       .wb-featured { grid-column: 1/3; grid-row: auto; }
       .wb-pic1, .wb-pic2, .wb-pic3, .wb-pic4 { grid-column: auto; grid-row: auto; }
       .wb-ugc, .wb-bi, .wb-motion, .wb-stills { grid-column: auto; grid-row: auto; }
-      .wb-asmr, .wb-unboxing { grid-column: auto; grid-row: auto; }
+      .wb-asmr, .wb-unboxing, .wb-billboard { grid-column: auto; grid-row: auto; }
       .services-bento { grid-template-columns: 1fr; }
       .service-card:nth-child(1), .service-card:nth-child(6) { grid-column: span 1; }
       .packages-grid { grid-template-columns: 1fr; }
@@ -1352,7 +1362,7 @@
 
     <% if (work && work.length > 0) { %>
     <%
-      var byType = { 'UGC': [], 'Brand Identity': [], 'Hyper Motion': [], 'Cinematic Stills': [], 'ASMR': [], 'Unboxing': [] };
+      var byType = { 'UGC': [], 'Brand Identity': [], 'Hyper Motion': [], 'Cinematic Stills': [], 'ASMR': [], 'Unboxing': [], 'Billboard': [] };
       work.forEach(function(i){ if(byType[i.type] !== undefined) byType[i.type].push(i); });
       var vids = work.filter(function(i){ return i.isVideo; });
       var imgs = work.filter(function(i){ return !i.isVideo; });
@@ -1538,9 +1548,9 @@
           <% byType['ASMR'].slice(0,4).forEach(function(item) { %>
           <div class="work-folder-preview-item">
             <% if (item.isVideo) { %>
-              <img src="<%= item.file.replace('/upload/', '/upload/w_300,h_225,c_fill,q_auto,so_0/').replace(/\.(mp4|mov|webm)$/i, '.jpg') %>" alt="<%= item.brand %>" />
+              <img src="<%= item.file.replace('/upload/', '/upload/w_600,c_fit,q_auto,so_0/').replace(/\.(mp4|mov|webm)$/i, '.jpg') %>" alt="<%= item.brand %>" />
             <% } else { %>
-              <img src="<%= item.file.replace('/upload/', '/upload/w_300,h_225,c_fill,q_auto/') %>" alt="<%= item.brand %>" loading="lazy" />
+              <img src="<%= item.file.replace('/upload/', '/upload/w_600,c_fit,q_auto/') %>" alt="<%= item.brand %>" loading="lazy" />
             <% } %>
           </div>
           <% }); %>
@@ -1556,9 +1566,27 @@
           <% byType['Unboxing'].slice(0,4).forEach(function(item) { %>
           <div class="work-folder-preview-item">
             <% if (item.isVideo) { %>
-              <img src="<%= item.file.replace('/upload/', '/upload/w_300,h_225,c_fill,q_auto,so_0/').replace(/\.(mp4|mov|webm)$/i, '.jpg') %>" alt="<%= item.brand %>" />
+              <img src="<%= item.file.replace('/upload/', '/upload/w_600,c_fit,q_auto,so_0/').replace(/\.(mp4|mov|webm)$/i, '.jpg') %>" alt="<%= item.brand %>" />
             <% } else { %>
-              <img src="<%= item.file.replace('/upload/', '/upload/w_300,h_225,c_fill,q_auto/') %>" alt="<%= item.brand %>" loading="lazy" />
+              <img src="<%= item.file.replace('/upload/', '/upload/w_600,c_fit,q_auto/') %>" alt="<%= item.brand %>" loading="lazy" />
+            <% } %>
+          </div>
+          <% }); %>
+        </div>
+      </div>
+
+      <!-- Billboard folder: row 5, col 1-2 -->
+      <div class="work-folder wb-billboard reveal" onclick="openFolder('Billboard')">
+        <p class="work-folder-label">Category</p>
+        <p class="work-folder-title">Billboard</p>
+        <p class="work-folder-count"><%= byType['Billboard'].length %> pieces</p>
+        <div class="work-folder-preview">
+          <% byType['Billboard'].slice(0,4).forEach(function(item) { %>
+          <div class="work-folder-preview-item">
+            <% if (item.isVideo) { %>
+              <img src="<%= item.file.replace('/upload/', '/upload/w_600,c_fit,q_auto,so_0/').replace(/\.(mp4|mov|webm)$/i, '.jpg') %>" alt="<%= item.brand %>" />
+            <% } else { %>
+              <img src="<%= item.file.replace('/upload/', '/upload/w_600,c_fit,q_auto/') %>" alt="<%= item.brand %>" loading="lazy" />
             <% } %>
           </div>
           <% }); %>
