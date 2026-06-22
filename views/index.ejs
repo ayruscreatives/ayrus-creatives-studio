@@ -1225,7 +1225,10 @@
             aria-label="<%= item.brand %> &#8212; <%= item.type %>"
           >
             <% if (item.isVideo) { %>
-              <video src="<%= item.file %>" muted loop playsinline preload="metadata"></video>
+              <%
+                var posterUrl = item.file.replace('/upload/', '/upload/w_400,h_240,c_fill,q_auto,so_0/').replace(/\.(mp4|mov|webm)$/i, '.jpg');
+              %>
+              <video src="<%= item.file %>" poster="<%= posterUrl %>" muted loop playsinline preload="metadata"></video>
             <% } else { %>
               <img src="<%= item.file %>" alt="<%= item.brand %>" loading="lazy" />
             <% } %>
@@ -1682,6 +1685,7 @@
         status.style.background = 'rgba(239,68,68,0.1)';
         status.style.color = '#ef4444';
         status.textContent = 'Something went wrong. Please try again.';
+        form.reset();
       }
       btn.disabled = false;
       btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;vertical-align:middle"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Send Message';

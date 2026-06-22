@@ -13,7 +13,5 @@
         sync: false
       - key: CLOUDINARY_API_SECRET
         sync: false
-      - key: GMAIL_USER
-        sync: false
-      - key: GMAIL_APP_PASS
+      - key: RESEND_API_KEY
         sync: false

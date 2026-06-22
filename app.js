@@ -2,7 +2,7 @@
 const express = require('express');
 const path = require('path');
 const { v2: cloudinary } = require('cloudinary');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -122,17 +122,11 @@ app.post('/admin/delete/*', async (req, res) => {
 app.post('/contact', async (req, res) => {
   const { name, email, message } = req.body;
   try {
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASS,
-      },
-    });
-    await transporter.sendMail({
-      from: `"Ayrus Creatives Website" <${process.env.GMAIL_USER}>`,
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({
+      from: 'Ayrus Creatives <onboarding@resend.dev>',
       to: 'ayrus.creativestudio@gmail.com',
-      replyTo: email,
+      reply_to: email,
       subject: `New enquiry from ${name}`,
       html: `
         <p><strong>Name:</strong> ${name}</p>
