@@ -293,7 +293,7 @@
     .hero-h1 {
       font-family: var(--heading-font);
       font-weight: 900;
-      font-size: clamp(3rem, 9vw, 8rem);
+      font-size: clamp(2.2rem, 11vw, 8rem);
       letter-spacing: -0.03em;
       line-height: 0.92;
       text-transform: uppercase;
@@ -660,10 +660,11 @@
       background: var(--bg-alt);
       border: none;
       border-radius: 50%;
-      width: 40px; height: 40px;
+      width: 44px; height: 44px;
       font-size: 1.2rem;
-      cursor: none;
+      cursor: pointer;
       display: flex; align-items: center; justify-content: center;
+      touch-action: manipulation;
     }
     .folder-modal-grid {
       display: grid;
@@ -1220,16 +1221,39 @@
     .modal-close {
       position: absolute;
       top: 16px; right: 16px;
-      width: 40px; height: 40px;
-      background: rgba(0,0,0,0.06);
+      width: 44px; height: 44px;
+      background: rgba(0,0,0,0.55);
       border: none;
       border-radius: 50%;
-      color: var(--text);
+      color: #fff;
       font-size: 1.2rem;
       display: flex; align-items: center; justify-content: center;
+      z-index: 10;
+      touch-action: manipulation;
+      cursor: pointer;
     }
-    .modal-close:hover { background: rgba(0,0,0,0.12); }
+    .modal-close:hover { background: rgba(0,0,0,0.75); }
     .modal-inner-wrapper { position: relative; }
+    .modal-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 44px; height: 44px;
+      background: rgba(0,0,0,0.45);
+      border: none;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 1.3rem;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 10;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: background 0.2s, opacity 0.2s;
+    }
+    .modal-nav:hover { background: rgba(0,0,0,0.75); }
+    .modal-nav.hidden { opacity: 0; pointer-events: none; }
+    .modal-nav-prev { left: 14px; }
+    .modal-nav-next { right: 14px; }
 
     /* ─── Reveal animation base ─────────────────────────── */
     .reveal {
@@ -1244,6 +1268,7 @@
 
     /* ─── MOBILE ────────────────────────────────────────── */
     @media (max-width: 768px) {
+      .hero-h1 { font-size: clamp(2rem, 11.5vw, 4rem); }
       nav { padding: 0 20px; }
       .nav-links { display: none; }
       .hero { padding: 96px 24px 120px; }
@@ -1310,7 +1335,7 @@
 
       <h1 class="hero-h1">
         <span class="hero-h1-line">Beyond</span>
-        <span class="hero-h1-line">
+        <span class="hero-h1-line" style="white-space:nowrap;">
           <span style="background:linear-gradient(135deg,#A87DF5,#F472B6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">Reality,</span>
           &nbsp;Beyond
         </span>
@@ -1887,6 +1912,8 @@
     <div class="modal-inner">
       <div class="modal-inner-wrapper">
         <button class="modal-close" onclick="closeModal()" aria-label="Close modal">&#x2715;</button>
+        <button class="modal-nav modal-nav-prev" id="modal-prev" onclick="modalNavigate(-1)" aria-label="Previous">&#8249;</button>
+        <button class="modal-nav modal-nav-next" id="modal-next" onclick="modalNavigate(1)" aria-label="Next">&#8250;</button>
         <div id="modal-media-container"></div>
         <div class="modal-body">
           <p class="modal-type" id="modal-type"></p>
@@ -1902,6 +1929,8 @@
     var workData = <%- JSON.stringify(work || []) %>;
 
     // ─── Folder open / close ─────────────────────────────
+    var _modalReturnFolder = null;
+
     function openFolder(cat) {
       var items = workData.filter(function(i){ return i.type === cat; });
       document.getElementById('folderModalTitle').textContent = cat;
@@ -1916,7 +1945,7 @@
           article.className = 'work-card';
           article.style.opacity = '1';
           article.style.transform = 'none';
-          article.onclick = function(){ closeFolder(); openModal(globalIdx); };
+          article.onclick = function(){ openModalFromFolder(globalIdx, cat); };
           if (item.isVideo) {
             var poster = item.file.replace('/upload/', '/upload/w_400,h_240,c_fill,q_auto,so_0/').replace(/\.(mp4|mov|webm)$/i, '.jpg');
             article.innerHTML = '<video src="' + item.file + '" poster="' + poster + '" muted loop playsinline preload="metadata"></video>';
@@ -1940,6 +1969,7 @@
     }
 
     function closeFolder() {
+      _modalReturnFolder = null;
       document.getElementById('folderModal').classList.remove('open');
       document.body.style.overflow = '';
     }
@@ -2014,7 +2044,29 @@
     });
 
     // ─── Modal ────────────────────────────────────────────
+    var _modalNavList = [];   // array of workData indices currently navigable
+    var _modalNavPos  = 0;    // position within _modalNavList
+
+    function openModalFromFolder(index, cat) {
+      _modalReturnFolder = cat;
+      // build nav list from folder items in their display order
+      var folderIndices = workData
+        .map(function(item, i) { return { item: item, i: i }; })
+        .filter(function(o) { return o.item.type === cat; })
+        .map(function(o) { return o.i; });
+      _modalNavList = folderIndices;
+      _modalNavPos  = folderIndices.indexOf(index);
+      _renderModal(index);
+    }
+
     function openModal(index) {
+      // pinned bento cards — no arrows
+      _modalNavList = [];
+      _modalNavPos  = 0;
+      _renderModal(index);
+    }
+
+    function _renderModal(index) {
       var item = workData[index];
       if (!item) return;
 
@@ -2037,17 +2089,39 @@
       }
 
       document.getElementById('modal-brand').textContent = item.brand;
-      document.getElementById('modal-type').textContent = item.type;
+      document.getElementById('modal-type').textContent  = item.type;
       document.getElementById('modal-brief').textContent = item.brief;
+
+      // show/hide arrows
+      var prevBtn = document.getElementById('modal-prev');
+      var nextBtn = document.getElementById('modal-next');
+      if (_modalNavPos <= 0) { prevBtn.classList.add('hidden'); }
+      else                   { prevBtn.classList.remove('hidden'); }
+      if (_modalNavPos >= _modalNavList.length - 1) { nextBtn.classList.add('hidden'); }
+      else                                          { nextBtn.classList.remove('hidden'); }
+
       document.getElementById('modal').classList.add('open');
       document.body.style.overflow = 'hidden';
+    }
+
+    function modalNavigate(dir) {
+      var newPos = _modalNavPos + dir;
+      if (newPos < 0 || newPos >= _modalNavList.length) return;
+      _modalNavPos = newPos;
+      _renderModal(_modalNavList[_modalNavPos]);
     }
 
     function closeModal() {
       var modal = document.getElementById('modal');
       modal.classList.remove('open');
-      document.body.style.overflow = '';
       document.getElementById('modal-media-container').innerHTML = '';
+      if (_modalReturnFolder) {
+        var returnCat = _modalReturnFolder;
+        _modalReturnFolder = null;
+        openFolder(returnCat);
+      } else {
+        document.body.style.overflow = '';
+      }
     }
 
     function closeModalOnBackdrop(e) {
@@ -2057,7 +2131,9 @@
     }
 
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') closeModal();
+      if (e.key === 'Escape') { closeModal(); return; }
+      if (e.key === 'ArrowLeft')  modalNavigate(-1);
+      if (e.key === 'ArrowRight') modalNavigate(1);
     });
 
     // ─── Nav active link on scroll ────────────────────────
